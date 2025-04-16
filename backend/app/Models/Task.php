@@ -14,10 +14,11 @@ class Task extends Model
         'title',
         'description',
         'status',
-        'priority',
         'due_date',
         'project_id',
-        'created_by'
+        'assigned_to',
+        'created_by',
+        'priority'
     ];
 
     protected $casts = [
@@ -29,14 +30,18 @@ class Task extends Model
         return $this->belongsTo(Project::class);
     }
 
+    public function assignedUser()
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
+    }
+
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function assignees()
+    public function comments()
     {
-        return $this->belongsToMany(User::class, 'task_assignments')
-            ->withTimestamps();
+        return $this->hasMany(Comment::class);
     }
 }
