@@ -21,6 +21,14 @@ const Register = () => {
     const [error, setError] = useState('');
     const { register } = useAuth();
     const navigate = useNavigate();
+    const [stats, setStats] = useState({
+        totalProjects: 0,
+        totalTasks: 0,
+        completedTasks: 0,
+        teamMembers: 0,
+    });
+    const [recentProjects, setRecentProjects] = useState([]);
+    const [upcomingTasks, setUpcomingTasks] = useState([]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;

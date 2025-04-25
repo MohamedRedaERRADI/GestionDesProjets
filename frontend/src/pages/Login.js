@@ -9,24 +9,49 @@ import {
     Typography,
     Box,
     Alert,
+    CircularProgress,
 } from '@mui/material';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
+
+    const validateForm = () => {
+        if (!email || !password) {
+            setError('Veuillez remplir tous les champs');
+            return false;
+        }
+        if (!/\S+@\S+\.\S+/.test(email)) {
+            setError('Veuillez entrer une adresse email valide');
+            return false;
+        }
+        return true;
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        
+        if (!validateForm()) {
+            return;
+        }
 
-        const result = await login(email, password);
-        if (result.success) {
-            navigate('/dashboard');
-        } else {
-            setError(result.error);
+        setLoading(true);
+        try {
+            const result = await login(email, password);
+            if (result.success) {
+                navigate('/dashboard');
+            } else {
+                setError(result.error || 'Erreur de connexion');
+            }
+        } catch (err) {
+            setError('Une erreur est survenue lors de la connexion');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -70,6 +95,8 @@ const Login = () => {
                             autoFocus
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            error={!!error && !email}
+                            disabled={loading}
                         />
                         <TextField
                             margin="normal"
@@ -82,14 +109,17 @@ const Login = () => {
                             autoComplete="current-password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            error={!!error && !password}
+                            disabled={loading}
                         />
                         <Button
                             type="submit"
                             fullWidth
                             variant="contained"
                             sx={{ mt: 3, mb: 2 }}
+                            disabled={loading}
                         >
-                            Se connecter
+                            {loading ? <CircularProgress size={24} /> : 'Se connecter'}
                         </Button>
                         <Box sx={{ textAlign: 'center' }}>
                             <Link to="/register" style={{ textDecoration: 'none' }}>

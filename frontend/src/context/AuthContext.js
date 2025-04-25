@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import api from '../api/axios';
 
 const AuthContext = createContext();
@@ -6,71 +6,108 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [token, setToken] = useState(localStorage.getItem('token'));
 
-    useEffect(() => {
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-            fetchUser();
-        } else {
+    const checkAuth = useCallback(async () => {
+        if (!token) {
             setLoading(false);
+            return;
         }
-    }, []);
 
-    const fetchUser = async () => {
         try {
-            const response = await api.get('/user');
+            console.log('Checking auth status with token:', token);
+            const response = await api.get('/api/auth/user');
+            console.log('Auth check response:', response.status);
             setUser(response.data);
         } catch (error) {
-            console.error('Erreur lors de la récupération des informations utilisateur:', error);
-            localStorage.removeItem('auth_token');
+            console.error('Error checking auth status:', error);
+            handleLogout();
         } finally {
             setLoading(false);
         }
+    }, [token]);
+
+    useEffect(() => {
+        checkAuth();
+    }, [checkAuth]);
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        setToken(null);
+        setUser(null);
     };
 
     const login = async (email, password) => {
         try {
-            const response = await api.post('/login', { email, password });
-            const { token, user } = response.data;
-            localStorage.setItem('auth_token', token);
-            setUser(user);
-            return { success: true };
+            // S'assurer d'avoir un CSRF token
+            await api.get('/sanctum/csrf-cookie');
+
+            console.log('Attempting login for:', email);
+            const response = await api.post('/api/auth/login', { email, password });
+            console.log('Login response:', response);
+
+            if (response.data.token) {
+                localStorage.setItem('token', response.data.token);
+                setToken(response.data.token);
+                setUser(response.data.user);
+                return { success: true };
+            } else {
+                return { 
+                    success: false, 
+                    error: response.data.message || 'Login failed' 
+                };
+            }
         } catch (error) {
+            console.error('Login error:', error);
             return { 
                 success: false, 
-                error: error.response?.data?.message || 'Erreur lors de la connexion' 
+                error: error.response?.data?.message || 'An error occurred during login' 
             };
         }
     };
 
     const register = async (userData) => {
         try {
-            const response = await api.post('/register', userData);
-            const { token, user } = response.data;
-            localStorage.setItem('auth_token', token);
-            setUser(user);
-            return { success: true };
+            // S'assurer d'avoir un CSRF token
+            await api.get('/sanctum/csrf-cookie');
+
+            const response = await api.post('/api/auth/register', userData);
+
+            if (response.data.token) {
+                localStorage.setItem('token', response.data.token);
+                setToken(response.data.token);
+                setUser(response.data.user);
+                return { success: true };
+            } else {
+                return { 
+                    success: false, 
+                    error: response.data.message || 'Registration failed' 
+                };
+            }
         } catch (error) {
+            console.error('Registration error:', error);
             return { 
                 success: false, 
-                error: error.response?.data?.message || 'Erreur lors de l\'inscription' 
+                error: error.response?.data?.message || 'An error occurred during registration' 
             };
         }
     };
 
     const logout = async () => {
         try {
-            await api.post('/logout');
+            if (token) {
+                await api.post('/api/auth/logout');
+            }
         } catch (error) {
-            console.error('Erreur lors de la déconnexion:', error);
+            console.error('Logout error:', error);
         } finally {
-            localStorage.removeItem('auth_token');
-            setUser(null);
+            handleLogout();
         }
     };
 
     const value = {
         user,
+        token,
         loading,
         login,
         register,

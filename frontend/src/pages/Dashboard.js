@@ -1,11 +1,43 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Container, Typography, Button, Box, Grid, Paper } from '@mui/material';
+import { Container, Typography, Button, Box, Grid, Paper, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-    const { user } = useAuth();
+    const { user, token } = useAuth();
     const navigate = useNavigate();
+    const [loading, setLoading] = React.useState(true);
+    const [error, setError] = React.useState(null);
+
+    useEffect(() => {
+        console.log('Dashboard mounted');
+        console.log('User:', user);
+        console.log('Token:', token);
+
+        if (!user || !token) {
+            console.log('No user or token found, redirecting to login');
+            navigate('/login');
+            return;
+        }
+
+        setLoading(false);
+    }, [user, token, navigate]);
+
+    if (loading) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Box p={3}>
+                <Typography color="error">{error}</Typography>
+            </Box>
+        );
+    }
 
     return (
         <Container>
