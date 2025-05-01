@@ -13,6 +13,7 @@ import Calendar from './components/Calendar';
 import Reports from './components/Reports';
 import Team from './components/Team';
 import Settings from './components/Settings';
+import Profile from './components/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -109,6 +110,16 @@ const App = () => {
                             <ProtectedRoute>
                                 <Layout>
                                     <Settings />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/profile"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <Profile />
                                 </Layout>
                             </ProtectedRoute>
                         }

@@ -1,0 +1,27 @@
+.profile-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.profile-paper {
+  padding: 32px;
+  border-radius: 12px;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  margin-right: 24px;
+  font-size: 2rem;
+}
+
+@media (max-width: 600px) {
+  .profile-paper {
+    padding: 24px 16px;
+  }
+  
+  .profile-container {
+    padding: 10px;
+  }
+} 
