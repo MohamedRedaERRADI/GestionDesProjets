@@ -180,8 +180,6 @@ const Dashboard = () => {
     const [upcomingTasks, setUpcomingTasks] = useState([]);
 
     useEffect(() => {
-        console.log('Dashboard mounted');
-        console.log('Token:', token);
         checkConnections();
         fetchDashboardData();
     }, []);

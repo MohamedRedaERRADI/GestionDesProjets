@@ -47,6 +47,7 @@ Route::middleware(['auth'])->group(function () {
     // Project management routes
     Route::prefix('projects')->group(function () {
         Route::get('/', [\App\Http\Controllers\ProjectController::class, 'index'])->name('projects.index');
+        // Create new project
         Route::post('/', [\App\Http\Controllers\ProjectController::class, 'store'])->name('projects.store');
         Route::get('/{project}', [\App\Http\Controllers\ProjectController::class, 'show'])->name('projects.show');
         Route::put('/{project}', [\App\Http\Controllers\ProjectController::class, 'update'])->name('projects.update');

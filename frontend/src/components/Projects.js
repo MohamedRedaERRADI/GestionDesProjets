@@ -27,7 +27,7 @@ const Projects = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [currentProject, setCurrentProject] = useState(null);
     const [formData, setFormData] = useState({
-        name: '',
+        title: '',
         description: '',
         start_date: '',
         end_date: '',
@@ -89,7 +89,7 @@ const Projects = () => {
         setCurrentProject(project);
         if (project) {
             setFormData({
-                name: project.name,
+                title: project.title,
                 description: project.description,
                 start_date: project.start_date,
                 end_date: project.end_date,
@@ -97,7 +97,7 @@ const Projects = () => {
             });
         } else {
             setFormData({
-                name: '',
+                title: '',
                 description: '',
                 start_date: '',
                 end_date: '',
@@ -217,7 +217,7 @@ const Projects = () => {
                         <Card>
                             <CardContent>
                                 <Box display="flex" justifyContent="space-between" alignItems="center">
-                                    <Typography variant="h6">{project.name}</Typography>
+                                    <Typography variant="h6">{project.title}</Typography>
                                     <Box>
                                         <IconButton onClick={() => handleOpenDialog(project)}>
                                             <EditIcon />
@@ -245,7 +245,7 @@ const Projects = () => {
                 ))}
             </Grid>
 
-            <Dialog open={openDialog} onClose={handleCloseDialog}>
+            <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
                 <DialogTitle>
                     {currentProject ? 'Edit Project' : 'New Project'}
                 </DialogTitle>
@@ -253,9 +253,9 @@ const Projects = () => {
                     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
                         <TextField
                             fullWidth
-                            label="Name"
-                            name="name"
-                            value={formData.name}
+                            label="Title"
+                            name="title"
+                            value={formData.title}
                             onChange={handleChange}
                             margin="normal"
                             required

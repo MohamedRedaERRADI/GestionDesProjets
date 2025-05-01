@@ -40,10 +40,6 @@ const Tasks = () => {
         status: 'pending'
     });
 
-    useEffect(() => {
-        fetchData();
-    }, [fetchData]);
-
     const fetchData = async () => {
         if (!token) {
             setError('No authentication token found');
@@ -80,6 +76,10 @@ const Tasks = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchData();
+    }, [token]); // Only re-run if token changes
 
     const handleOpenDialog = (task = null) => {
         if (task) {

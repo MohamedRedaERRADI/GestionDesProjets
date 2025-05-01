@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
 {
+    // Display a listing of the projects
     public function index()
     {
         $projects = Project::where('user_id', Auth::id())
@@ -17,24 +18,27 @@ class ProjectController extends Controller
         return response()->json($projects);
     }
 
+    // Show the form for creating a new project
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'status' => 'required|in:pending,in_progress,completed,cancelled'
         ]);
 
-        $project = Project::create([
-            ...$validated,
-            'user_id' => Auth::id()
-        ]);
+        $project = Project::create(array_merge(
+            $validated,
+            ['user_id' => Auth::id()]
+        ));
 
         return response()->json($project, 201);
     }
 
+
+    // Display the specified project
     public function show(Project $project)
     {
         if ($project->user_id !== Auth::id()) {
@@ -44,6 +48,7 @@ class ProjectController extends Controller
         return response()->json($project);
     }
 
+    // Show the form for editing the specified project
     public function update(Request $request, Project $project)
     {
         if ($project->user_id !== Auth::id()) {
@@ -51,7 +56,7 @@ class ProjectController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
+            'title' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'start_date' => 'sometimes|required|date',
             'end_date' => 'sometimes|required|date|after:start_date',
@@ -63,6 +68,7 @@ class ProjectController extends Controller
         return response()->json($project);
     }
 
+    // Remove the specified project from storage
     public function destroy(Project $project)
     {
         if ($project->user_id !== Auth::id()) {

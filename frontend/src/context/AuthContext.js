@@ -42,9 +42,7 @@ export const AuthProvider = ({ children }) => {
             // S'assurer d'avoir un CSRF token
             await api.get('/sanctum/csrf-cookie');
 
-            console.log('Attempting login for:', email);
             const response = await api.post('/api/auth/login', { email, password });
-            console.log('Login response:', response);
 
             if (response.data.token) {
                 localStorage.setItem('token', response.data.token);

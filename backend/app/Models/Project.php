@@ -11,7 +11,7 @@ class Project extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'name',
+        'title',
         'description',
         'start_date',
         'end_date',
