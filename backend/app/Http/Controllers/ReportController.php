@@ -13,6 +13,35 @@ use PDF;
 class ReportController extends Controller
 {
     /**
+     * Get available report types.
+     */
+    public function index()
+    {
+        $user = Auth::user();
+        $availableReports = [
+            'project_progress' => [
+                'name' => 'Project Progress Report',
+                'description' => 'View task completion and progress statistics for a project',
+                'url' => '/api/reports/project-progress'
+            ],
+            'user_performance' => [
+                'name' => 'User Performance Report',
+                'description' => 'View task completion statistics and performance metrics for a user',
+                'url' => '/api/reports/user-performance'
+            ],
+            'team_performance' => [
+                'name' => 'Team Performance Report',
+                'description' => 'View team members performance and contribution statistics',
+                'url' => '/api/reports/team-performance'
+            ]
+        ];
+
+        return response()->json([
+            'available_reports' => $availableReports
+        ]);
+    }
+
+    /**
      * Generate a project progress report.
      */
     public function projectProgress(Request $request, Project $project)

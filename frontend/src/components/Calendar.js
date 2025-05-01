@@ -14,6 +14,7 @@ const Calendar = () => {
             try {
                 setLoading(true);
                 const response = await api.get(API_ENDPOINTS.events);
+                console.log('Calendar events fetched:', response.data);
                 setEvents(response.data);
                 setError(null);
             } catch (err) {
@@ -71,9 +72,22 @@ const Calendar = () => {
         // Add cells for each day of the month
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+            // Filtrer les événements qui se déroulent le jour courant
             const dayEvents = events.filter(event => {
-                const eventDate = new Date(event.start);
-                return eventDate.toDateString() === date.toDateString();
+                // Pour les tâches (qui n'ont qu'une date)
+                if (event.type === 'task') {
+                    const eventDate = new Date(event.start);
+                    return eventDate.toDateString() === date.toDateString();
+                } 
+                // Pour les projets (qui ont une date de début et de fin)
+                else if (event.type === 'project') {
+                    const startDate = new Date(event.start);
+                    const endDate = new Date(event.end);
+                    
+                    // Vérifier si la date actuelle est entre la date de début et de fin du projet (inclusivement)
+                    return date >= startDate && date <= endDate;
+                }
+                return false;
             });
 
             days.push(

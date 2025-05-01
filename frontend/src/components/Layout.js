@@ -9,6 +9,7 @@ import {
   IconButton,
   List,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
   Toolbar,
@@ -88,8 +89,7 @@ const Layout = ({ children }) => {
       <Divider />
       <List>
         {menuItems.map((item) => (
-          <ListItem
-            button
+          <ListItemButton
             key={item.text}
             onClick={() => navigate(item.path)}
             selected={location.pathname === item.path}
@@ -117,7 +117,7 @@ const Layout = ({ children }) => {
               {item.icon}
             </ListItemIcon>
             <ListItemText primary={item.text} />
-          </ListItem>
+          </ListItemButton>
         ))}
       </List>
     </Box>

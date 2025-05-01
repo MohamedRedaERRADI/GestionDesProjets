@@ -53,6 +53,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Reports routes
     Route::get('reports', [ReportController::class, 'index']);
+    Route::get('reports/project-progress/{project}', [ReportController::class, 'projectProgress']);
+    Route::get('reports/user-performance/{user}', [ReportController::class, 'userPerformance']);
+    Route::get('reports/team-performance/{project}', [ReportController::class, 'teamPerformance']);
 
     // Routes pour les commentaires
     Route::get('/tasks/{task}/comments', [CommentController::class, 'index']);

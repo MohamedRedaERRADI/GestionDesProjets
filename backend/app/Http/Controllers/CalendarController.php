@@ -6,6 +6,7 @@ use App\Models\Task;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class CalendarController extends Controller
@@ -16,8 +17,14 @@ class CalendarController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $startDate = $request->input('start', Carbon::now()->startOfMonth());
-        $endDate = $request->input('end', Carbon::now()->endOfMonth());
+        $startDate = $request->input('start', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->input('end', Carbon::now()->endOfMonth()->format('Y-m-d'));
+
+        Log::info('Calendar request', [
+            'user_id' => $user->id,
+            'start_date' => $startDate,
+            'end_date' => $endDate
+        ]);
 
         // Récupérer les tâches de l'utilisateur
         $tasks = Task::where('assigned_to', $user->id)
@@ -27,8 +34,8 @@ class CalendarController extends Controller
                 return [
                     'id' => 'task_' . $task->id, // Préfixe pour éviter les collisions d'ID
                     'title' => $task->title,
-                    'start' => $task->due_date,
-                    'end' => $task->due_date,
+                    'start' => $task->due_date->format('Y-m-d'),
+                    'end' => $task->due_date->format('Y-m-d'),
                     'color' => $this->getTaskColor($task),
                     'type' => 'task',
                     'url' => "/tasks/{$task->id}"
@@ -40,17 +47,39 @@ class CalendarController extends Controller
             $query->where('user_id', $user->id);
         })
         ->where(function($query) use ($startDate, $endDate) {
-            $query->whereBetween('start_date', [$startDate, $endDate])
-                  ->orWhereBetween('end_date', [$startDate, $endDate]);
+            // Inclusion des projets qui ont des dates qui chevauchent la période
+            $query->where(function ($q) use ($startDate, $endDate) {
+                // Projets qui commencent pendant le mois
+                $q->whereBetween('start_date', [$startDate, $endDate])
+                // OU projets qui finissent pendant le mois
+                ->orWhereBetween('end_date', [$startDate, $endDate])
+                // OU projets qui englobent tout le mois
+                ->orWhere(function ($q2) use ($startDate, $endDate) {
+                    $q2->where('start_date', '<=', $startDate)
+                        ->where('end_date', '>=', $endDate);
+                });
+            });
         })
         ->get();
+
+        Log::info('Projects found', [
+            'count' => $userProjects->count(),
+            'projects' => $userProjects->map(function ($p) {
+                return [
+                    'id' => $p->id,
+                    'title' => $p->title,
+                    'start_date' => $p->start_date,
+                    'end_date' => $p->end_date
+                ];
+            })
+        ]);
 
         $projects = $userProjects->map(function ($project) {
             return [
                 'id' => 'project_' . $project->id, // Préfixe pour éviter les collisions d'ID
                 'title' => $project->title,
-                'start' => $project->start_date,
-                'end' => $project->end_date,
+                'start' => $project->start_date->format('Y-m-d'),
+                'end' => $project->end_date->format('Y-m-d'),
                 'color' => '#4CAF50', // Couleur verte pour les projets
                 'type' => 'project',
                 'url' => "/projects/{$project->id}"
@@ -59,6 +88,11 @@ class CalendarController extends Controller
 
         // Merge tasks and projects as plain arrays
         $events = $tasks->concat($projects);
+
+        Log::info('Calendar events response', [
+            'count' => $events->count(),
+            'data' => $events
+        ]);
 
         return response()->json($events);
     }
