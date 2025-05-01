@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Calendar.css';
+import { API_ENDPOINTS } from '../config/api';
+import api from '../api/axios';
 
 const Calendar = () => {
     const [events, setEvents] = useState([]);
@@ -10,14 +12,33 @@ const Calendar = () => {
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const response = await fetch('/api/calendar/events');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch events');
-                }
-                const data = await response.json();
-                setEvents(data);
+                setLoading(true);
+                const response = await api.get(API_ENDPOINTS.events);
+                setEvents(response.data);
+                setError(null);
             } catch (err) {
-                setError(err.message);
+                console.error('Calendar events fetch error:', err);
+                
+                // Extract the most useful error message
+                let errorMessage = 'Failed to fetch events';
+                
+                if (err.response) {
+                    // Server responded with an error status
+                    errorMessage = `Server error: ${err.response.status} ${err.response.statusText}`;
+                    
+                    // If there's more specific error information in the response data
+                    if (err.response.data && err.response.data.message) {
+                        errorMessage += ` - ${err.response.data.message}`;
+                    }
+                } else if (err.request) {
+                    // Request made but no response received
+                    errorMessage = 'No response from server. Please check if the backend is running.';
+                } else {
+                    // Error setting up the request
+                    errorMessage = err.message || errorMessage;
+                }
+                
+                setError(errorMessage);
             } finally {
                 setLoading(false);
             }
@@ -51,7 +72,7 @@ const Calendar = () => {
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
             const dayEvents = events.filter(event => {
-                const eventDate = new Date(event.date);
+                const eventDate = new Date(event.start);
                 return eventDate.toDateString() === date.toDateString();
             });
 

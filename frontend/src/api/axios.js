@@ -20,6 +20,7 @@ api.interceptors.request.use(
         return config;
     },
     (error) => {
+        console.error('Request error:', error);
         return Promise.reject(error);
     }
 );
@@ -28,6 +29,15 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
+        // Log detailed error information
+        console.error('API Response Error:', {
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            data: error.response?.data,
+            config: error.config,
+            url: error.config?.url
+        });
+
         if (error.response?.status === 419) {
             // Si on reçoit une erreur CSRF, on récupère un nouveau token et on réessaie
             await axios.get('http://localhost:8000/sanctum/csrf-cookie', {
@@ -35,6 +45,14 @@ api.interceptors.response.use(
             });
             return api(error.config);
         }
+
+        if (error.response?.status === 401) {
+            // Token expiré ou invalide
+            localStorage.removeItem('token');
+            // Optionnel: rediriger vers la page de connexion
+            // window.location.href = '/login';
+        }
+
         return Promise.reject(error);
     }
 );

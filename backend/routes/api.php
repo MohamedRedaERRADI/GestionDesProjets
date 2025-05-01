@@ -49,7 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('team', TeamController::class);
 
     // Calendar routes
-    Route::get('calendar/events', [CalendarController::class, 'events']);
+    Route::get('calendar/events', [CalendarController::class, 'index']);
 
     // Reports routes
     Route::get('reports', [ReportController::class, 'index']);

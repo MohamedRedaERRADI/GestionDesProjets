@@ -22,6 +22,7 @@ import {
     MenuItem
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import TaskForm from './TaskForm';
 
 const Tasks = () => {
     const { token } = useAuth();
@@ -34,10 +35,10 @@ const Tasks = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        project_id: '',
-        due_date: '',
+        dueDate: '',
         priority: 'medium',
-        status: 'pending'
+        status: 'pending',
+        projectId: '',
     });
 
     const fetchData = async () => {
@@ -69,6 +70,7 @@ const Tasks = () => {
 
             setTasks(tasksData);
             setProjects(projectsData);
+            console.log('Projects loaded:', projectsData);
         } catch (err) {
             console.error('Data fetch error:', err);
             setError(err.message);
@@ -87,20 +89,20 @@ const Tasks = () => {
             setFormData({
                 title: task.title,
                 description: task.description,
-                project_id: task.project_id,
-                due_date: task.due_date,
+                dueDate: task.due_date || '',
                 priority: task.priority,
-                status: task.status
+                status: task.status,
+                projectId: task.project_id || '',
             });
         } else {
             setCurrentTask(null);
             setFormData({
                 title: '',
                 description: '',
-                project_id: '',
-                due_date: '',
+                dueDate: '',
                 priority: 'medium',
-                status: 'pending'
+                status: 'pending',
+                projectId: '',
             });
         }
         setOpenDialog(true);
@@ -112,16 +114,25 @@ const Tasks = () => {
         setFormData({
             title: '',
             description: '',
-            project_id: '',
-            due_date: '',
+            dueDate: '',
             priority: 'medium',
-            status: 'pending'
+            status: 'pending',
+            projectId: '',
         });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const apiData = {
+                title: formData.title,
+                description: formData.description,
+                due_date: formData.dueDate,
+                priority: formData.priority,
+                status: formData.status,
+                project_id: formData.projectId,
+            };
+            
             const url = currentTask
                 ? API_ENDPOINTS.taskDetail(currentTask.id)
                 : API_ENDPOINTS.taskList;
@@ -133,7 +144,7 @@ const Tasks = () => {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(apiData)
             });
 
             if (!response.ok) {
@@ -221,7 +232,7 @@ const Tasks = () => {
                                     {task.description}
                                 </Typography>
                                 <Typography variant="body2" color="textSecondary">
-                                    Project: {projects.find(p => p.id === task.project_id)?.name || 'Unknown'}
+                                    Project: {projects.find(p => p.id === task.project_id || p._id === task.project_id)?.name || 'Unknown'}
                                 </Typography>
                                 <Typography variant="body2" color="textSecondary">
                                     Due: {new Date(task.due_date).toLocaleDateString()}
@@ -253,82 +264,17 @@ const Tasks = () => {
 
             <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
                 <DialogTitle>
-                    {currentTask ? 'Edit Task' : 'New Task'}
+                    {currentTask ? 'Modifier la tâche' : 'Nouvelle tâche'}
                 </DialogTitle>
                 <form onSubmit={handleSubmit}>
-                    <DialogContent>
-                        <TextField
-                            autoFocus
-                            margin="dense"
-                            label="Task Title"
-                            fullWidth
-                            value={formData.title}
-                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            required
-                        />
-                        <TextField
-                            margin="dense"
-                            label="Description"
-                            fullWidth
-                            multiline
-                            rows={4}
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        />
-                        <FormControl fullWidth margin="dense">
-                            <InputLabel>Project</InputLabel>
-                            <Select
-                                value={formData.project_id}
-                                onChange={(e) => setFormData({ ...formData, project_id: e.target.value })}
-                                required
-                            >
-                                {projects.map(project => (
-                                    <MenuItem key={project.id} value={project.id}>
-                                        {project.name}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                        <TextField
-                            margin="dense"
-                            label="Due Date"
-                            type="date"
-                            fullWidth
-                            value={formData.due_date}
-                            onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                        />
-                        <FormControl fullWidth margin="dense">
-                            <InputLabel>Priority</InputLabel>
-                            <Select
-                                value={formData.priority}
-                                onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                            >
-                                <MenuItem value="low">Low</MenuItem>
-                                <MenuItem value="medium">Medium</MenuItem>
-                                <MenuItem value="high">High</MenuItem>
-                            </Select>
-                        </FormControl>
-                        <FormControl fullWidth margin="dense">
-                            <InputLabel>Status</InputLabel>
-                            <Select
-                                value={formData.status}
-                                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                            >
-                                <MenuItem value="pending">Pending</MenuItem>
-                                <MenuItem value="in_progress">In Progress</MenuItem>
-                                <MenuItem value="completed">Completed</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleCloseDialog}>Cancel</Button>
-                        <Button type="submit" variant="contained" color="primary">
-                            {currentTask ? 'Update' : 'Create'}
-                        </Button>
-                    </DialogActions>
+                    <TaskForm
+                        formData={formData}
+                        setFormData={setFormData}
+                        projects={projects}
+                        onSubmit={handleSubmit}
+                        onClose={handleCloseDialog}
+                        task={currentTask}
+                    />
                 </form>
             </Dialog>
         </Box>

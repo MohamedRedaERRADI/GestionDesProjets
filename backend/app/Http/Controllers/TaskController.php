@@ -13,7 +13,7 @@ class TaskController extends Controller
     public function index()
     {
         $tasks = Task::all();
-        return view('tasks.index', compact('tasks'));
+        return response()->json($tasks);
     }
 
     /**
@@ -21,7 +21,7 @@ class TaskController extends Controller
      */
     public function create()
     {
-        return view('tasks.create');
+        return response()->json(['message' => 'Méthode non supportée dans l\'API'], 405);
     }
 
     /**
@@ -36,10 +36,9 @@ class TaskController extends Controller
             'due_date' => 'nullable|date',
         ]);
 
-        Task::create($validated);
+        $task = Task::create($validated);
 
-        return redirect()->route('tasks.index')
-            ->with('success', 'Task created successfully.');
+        return response()->json($task, 201);
     }
 
     /**
@@ -48,7 +47,7 @@ class TaskController extends Controller
     public function show($id)
     {
         $task = Task::findOrFail($id);
-        return view('tasks.show', compact('task'));
+        return response()->json($task);
     }
 
     /**
@@ -67,8 +66,7 @@ class TaskController extends Controller
 
         $task->update($validated);
 
-        return redirect()->route('tasks.index')
-            ->with('success', 'Task updated successfully.');
+        return response()->json($task);
     }
 
     /**
@@ -79,7 +77,6 @@ class TaskController extends Controller
         $task = Task::findOrFail($id);
         $task->delete();
 
-        return redirect()->route('tasks.index')
-            ->with('success', 'Task deleted successfully.');
+        return response()->json(null, 204);
     }
 }

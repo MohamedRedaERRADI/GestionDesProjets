@@ -25,36 +25,40 @@ class CalendarController extends Controller
             ->get()
             ->map(function ($task) {
                 return [
-                    'id' => $task->id,
+                    'id' => 'task_' . $task->id, // Préfixe pour éviter les collisions d'ID
                     'title' => $task->title,
                     'start' => $task->due_date,
                     'end' => $task->due_date,
                     'color' => $this->getTaskColor($task),
                     'type' => 'task',
-                    'url' => route('tasks.show', $task->id)
+                    'url' => "/tasks/{$task->id}"
                 ];
             });
 
         // Récupérer les projets de l'utilisateur
-        $projects = Project::whereHas('members', function ($query) use ($user) {
+        $userProjects = Project::whereHas('members', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })
-        ->whereBetween('start_date', [$startDate, $endDate])
-        ->orWhereBetween('end_date', [$startDate, $endDate])
-        ->get()
-        ->map(function ($project) {
+        ->where(function($query) use ($startDate, $endDate) {
+            $query->whereBetween('start_date', [$startDate, $endDate])
+                  ->orWhereBetween('end_date', [$startDate, $endDate]);
+        })
+        ->get();
+
+        $projects = $userProjects->map(function ($project) {
             return [
-                'id' => $project->id,
-                'title' => $project->name,
+                'id' => 'project_' . $project->id, // Préfixe pour éviter les collisions d'ID
+                'title' => $project->title,
                 'start' => $project->start_date,
                 'end' => $project->end_date,
                 'color' => '#4CAF50', // Couleur verte pour les projets
                 'type' => 'project',
-                'url' => route('projects.show', $project->id)
+                'url' => "/projects/{$project->id}"
             ];
         });
 
-        $events = $tasks->merge($projects);
+        // Merge tasks and projects as plain arrays
+        $events = $tasks->concat($projects);
 
         return response()->json($events);
     }
