@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -14,8 +14,14 @@ import Reports from './components/Reports';
 import Team from './components/Team';
 import Settings from './components/Settings';
 import Profile from './components/Profile';
-import ProtectedRoute from './components/ProtectedRoute';
+import Board from './components/Board';
 import './App.css';
+
+// Route protégée qui vérifie l'authentification
+const PrivateRoute = ({ children }) => {
+    const { isAuthenticated } = useAuth();
+    return isAuthenticated ? children : <Navigate to="/login" />;
+};
 
 const App = () => {
     return (
@@ -27,111 +33,121 @@ const App = () => {
                     <Route
                         path="/"
                         element={
-                            <ProtectedRoute>
+                            <PrivateRoute>
                                 <Layout>
                                     <Dashboard />
                                 </Layout>
-                            </ProtectedRoute>
+                            </PrivateRoute>
                         }
                     />
                     <Route
                         path="/dashboard"
                         element={
-                            <ProtectedRoute>
+                            <PrivateRoute>
                                 <Layout>
                                     <Dashboard />
                                 </Layout>
-                            </ProtectedRoute>
+                            </PrivateRoute>
                         }
                     />
                     <Route
                         path="/projects"
                         element={
-                            <ProtectedRoute>
+                            <PrivateRoute>
                                 <Layout>
                                     <Projects />
                                 </Layout>
-                            </ProtectedRoute>
+                            </PrivateRoute>
                         }
                     />
                     <Route
                         path="/projects/:id"
                         element={
-                            <ProtectedRoute>
+                            <PrivateRoute>
                                 <Layout>
                                     <ProjectDetails />
                                 </Layout>
-                            </ProtectedRoute>
+                            </PrivateRoute>
                         }
                     />
                     <Route
                         path="/tasks"
                         element={
-                            <ProtectedRoute>
+                            <PrivateRoute>
                                 <Layout>
                                     <Tasks />
                                 </Layout>
-                            </ProtectedRoute>
+                            </PrivateRoute>
                         }
                     />
                     <Route
                         path="/calendar"
                         element={
-                            <ProtectedRoute>
+                            <PrivateRoute>
                                 <Layout>
                                     <Calendar />
                                 </Layout>
-                            </ProtectedRoute>
+                            </PrivateRoute>
                         }
                     />
                     <Route
                         path="/reports"
                         element={
-                            <ProtectedRoute>
+                            <PrivateRoute>
                                 <Layout>
                                     <Reports />
                                 </Layout>
-                            </ProtectedRoute>
+                            </PrivateRoute>
                         }
                     />
                     <Route
                         path="/team"
                         element={
-                            <ProtectedRoute>
+                            <PrivateRoute>
                                 <Layout>
                                     <Team />
                                 </Layout>
-                            </ProtectedRoute>
+                            </PrivateRoute>
                         }
                     />
                     <Route
                         path="/settings"
                         element={
-                            <ProtectedRoute>
+                            <PrivateRoute>
                                 <Layout>
                                     <Settings />
                                 </Layout>
-                            </ProtectedRoute>
+                            </PrivateRoute>
                         }
                     />
                     <Route
                         path="/profile"
                         element={
-                            <ProtectedRoute>
+                            <PrivateRoute>
                                 <Layout>
                                     <Profile />
                                 </Layout>
-                            </ProtectedRoute>
+                            </PrivateRoute>
                         }
                     />
                     <Route
                         path="/ai-assistant"
                         element={
-                            <ProtectedRoute>
+                            <PrivateRoute>
                                 <Layout>
                                     <AIAssistant />
                                 </Layout>
-                            </ProtectedRoute>
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/board"
+                        element={
+                            <PrivateRoute>
+                                <Layout>
+                                    <Board />
+                                </Layout>
+                            </PrivateRoute>
                         }
                     />
                 </Routes>

@@ -124,4 +124,60 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    public function updateProfile(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . $user->id,
+                'currentPassword' => 'sometimes|required_with:newPassword',
+                'newPassword' => 'sometimes|required_with:currentPassword|min:8|confirmed',
+                'newPassword_confirmation' => 'sometimes|required_with:newPassword'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation error',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Check current password if provided
+            if ($request->has('currentPassword')) {
+                if (!Hash::check($request->currentPassword, $user->password)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Current password is incorrect'
+                    ], 400);
+                }
+                
+                if ($request->has('newPassword')) {
+                    $user->password = Hash::make($request->newPassword);
+                }
+            }
+
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile updated successfully',
+                'user' => $user
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error in AuthController::updateProfile', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -147,8 +147,10 @@ const Tasks = () => {
                 body: JSON.stringify(apiData)
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error('Failed to save task');
+                throw new Error(data.error || 'Failed to save task');
             }
 
             await fetchData();
@@ -214,7 +216,7 @@ const Tasks = () => {
 
             <Grid container spacing={3}>
                 {tasks.map(task => (
-                    <Grid item xs={12} sm={6} md={4} key={task.id}>
+                    <Grid xs={12} sm={6} md={4} key={task.id}>
                         <Card>
                             <CardContent>
                                 <Box display="flex" justifyContent="space-between" alignItems="flex-start">
@@ -232,7 +234,7 @@ const Tasks = () => {
                                     {task.description}
                                 </Typography>
                                 <Typography variant="body2" color="textSecondary">
-                                    Project: {projects.find(p => p.id === task.project_id || p._id === task.project_id)?.name || 'Unknown'}
+                                    Project: {task.project?.title || 'Unknown'}
                                 </Typography>
                                 <Typography variant="body2" color="textSecondary">
                                     Due: {new Date(task.due_date).toLocaleDateString()}
@@ -281,4 +283,4 @@ const Tasks = () => {
     );
 };
 
-export default Tasks; 
+export default Tasks;

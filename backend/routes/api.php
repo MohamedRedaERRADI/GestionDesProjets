@@ -11,6 +11,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\BoardColumnController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth routes
     Route::post('auth/logout', [AuthController::class, 'logout']);
     Route::get('auth/user', [AuthController::class, 'user']);
+    Route::put('users/profile', [AuthController::class, 'updateProfile']);
 
     // Dashboard routes
     Route::get('/dashboard/stats', [DashboardController::class, 'getStats']);
@@ -41,12 +43,16 @@ Route::middleware('auth:sanctum')->group(function () {
     // Projects routes
     Route::apiResource('projects', ProjectController::class);
     Route::get('projects/{project}/tasks', [ProjectController::class, 'tasks']);
+    Route::get('projects/{project}/team', [ProjectController::class, 'teamMembers']);
 
     // Tasks routes
     Route::apiResource('tasks', TaskController::class);
 
     // Team routes
     Route::apiResource('team', TeamController::class);
+    Route::post('projects/{project}/team/invite', [TeamController::class, 'invite']);
+    Route::delete('projects/{project}/team/{user}', [TeamController::class, 'remove']);
+    Route::put('projects/{project}/team/{user}/role', [TeamController::class, 'updateRole']);
 
     // Calendar routes
     Route::get('calendar/events', [CalendarController::class, 'index']);
@@ -65,4 +71,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Routes de l'assistant IA
     Route::post('/ai/assistant', [AIAssistantController::class, 'handle']);
+
+    // Board routes
+    Route::get('/projects/{project}/board', [BoardColumnController::class, 'index']);
+    Route::post('/projects/{project}/board', [BoardColumnController::class, 'store']);
+    Route::put('/projects/{project}/board/{column}', [BoardColumnController::class, 'update']);
+    Route::delete('/projects/{project}/board/{column}', [BoardColumnController::class, 'destroy']);
+    
+    // Update task status
+    Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus']);
 });

@@ -41,4 +41,33 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Get the projects that belong to the user.
+     */
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class, 'project_members')
+                    ->withPivot('role')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Get the tasks assigned to the user.
+     */
+    public function tasks()
+    {
+        return $this->hasMany(Task::class, 'assignee_id');
+    }
+
+    /**
+     * Check if the user is an admin in any project
+     */
+    public function isAdmin()
+    {
+        return $this->projects()
+            ->wherePivot('role', 'admin')
+            ->orWherePivot('role', 'owner')
+            ->exists();
+    }
 }

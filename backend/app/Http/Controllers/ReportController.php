@@ -2,190 +2,136 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Task;
 use App\Models\Project;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
-use PDF;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
-    /**
-     * Get available report types.
-     */
     public function index()
     {
-        $user = Auth::user();
-        $availableReports = [
-            'project_progress' => [
-                'name' => 'Project Progress Report',
-                'description' => 'View task completion and progress statistics for a project',
-                'url' => '/api/reports/project-progress'
-            ],
-            'user_performance' => [
-                'name' => 'User Performance Report',
-                'description' => 'View task completion statistics and performance metrics for a user',
-                'url' => '/api/reports/user-performance'
-            ],
-            'team_performance' => [
-                'name' => 'Team Performance Report',
-                'description' => 'View team members performance and contribution statistics',
-                'url' => '/api/reports/team-performance'
-            ]
-        ];
+        try {
+            $user = Auth::user();
+            $projects = Project::whereHas('members', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->get();
 
-        return response()->json([
-            'available_reports' => $availableReports
-        ]);
-    }
+            $generalStats = [
+                'total_projects' => $projects->count(),
+                'completed_projects' => $projects->where('status', 'completed')->count(),
+                'in_progress_projects' => $projects->where('status', 'in_progress')->count(),
+                'pending_projects' => $projects->where('status', 'pending')->count()
+            ];
 
-    /**
-     * Generate a project progress report.
-     */
-    public function projectProgress(Request $request, Project $project)
-    {
-        $this->authorize('view', $project);
-
-        $tasks = $project->tasks()
-            ->with(['assignedTo', 'createdBy'])
-            ->get();
-
-        $stats = [
-            'total_tasks' => $tasks->count(),
-            'completed_tasks' => $tasks->where('status', 'completed')->count(),
-            'in_progress_tasks' => $tasks->where('status', 'in_progress')->count(),
-            'pending_tasks' => $tasks->where('status', 'pending')->count(),
-            'overdue_tasks' => $tasks->where('status', '!=', 'completed')
-                ->where('due_date', '<', now())
-                ->count()
-        ];
-
-        if ($request->has('download')) {
-            $pdf = PDF::loadView('reports.project-progress', [
-                'project' => $project,
-                'tasks' => $tasks,
-                'stats' => $stats
-            ]);
-
-            return $pdf->download("project-progress-{$project->id}.pdf");
+            return response()->json($generalStats);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        return response()->json([
-            'project' => $project,
-            'tasks' => $tasks,
-            'stats' => $stats
-        ]);
     }
 
-    /**
-     * Generate a user performance report.
-     */
-    public function userPerformance(Request $request, User $user)
+    public function projectProgress(Project $project)
     {
-        $this->authorize('view-performance', $user);
+        try {
+            // Vérifier les permissions
+            if (!$project->members()->where('user_id', Auth::id())->exists()) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
 
-        $startDate = $request->input('start_date', Carbon::now()->subMonth());
-        $endDate = $request->input('end_date', Carbon::now());
+            $tasks = $project->tasks;
+            $totalTasks = $tasks->count();
+            $completedTasks = $tasks->where('status', 'completed')->count();
+            $inProgressTasks = $tasks->where('status', 'in_progress')->count();
+            $pendingTasks = $tasks->where('status', 'pending')->count();
 
-        $tasks = Task::where('assigned_to', $user->id)
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->get();
+            $progress = [
+                'project_name' => $project->title,
+                'total_tasks' => $totalTasks,
+                'completed_tasks' => $completedTasks,
+                'in_progress_tasks' => $inProgressTasks,
+                'pending_tasks' => $pendingTasks,
+                'completion_rate' => $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0,
+                'start_date' => $project->start_date,
+                'end_date' => $project->end_date,
+                'status' => $project->status
+            ];
 
-        $stats = [
-            'total_tasks' => $tasks->count(),
-            'completed_tasks' => $tasks->where('status', 'completed')->count(),
-            'on_time_tasks' => $tasks->where('status', 'completed')
-                ->where('completed_at', '<=', 'due_date')
-                ->count(),
-            'overdue_tasks' => $tasks->where('status', 'completed')
-                ->where('completed_at', '>', 'due_date')
-                ->count(),
-            'completion_rate' => $tasks->count() > 0 
-                ? round(($tasks->where('status', 'completed')->count() / $tasks->count()) * 100, 2)
-                : 0
-        ];
-
-        if ($request->has('download')) {
-            $pdf = PDF::loadView('reports.user-performance', [
-                'user' => $user,
-                'tasks' => $tasks,
-                'stats' => $stats,
-                'period' => [
-                    'start' => $startDate,
-                    'end' => $endDate
-                ]
-            ]);
-
-            return $pdf->download("user-performance-{$user->id}.pdf");
+            return response()->json($progress);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        return response()->json([
-            'user' => $user,
-            'tasks' => $tasks,
-            'stats' => $stats,
-            'period' => [
-                'start' => $startDate,
-                'end' => $endDate
-            ]
-        ]);
     }
 
-    /**
-     * Generate a team performance report.
-     */
-    public function teamPerformance(Request $request, Project $project)
+    public function userPerformance(User $user)
     {
-        $this->authorize('view-team-performance', $project);
+        try {
+            // Vérifier les permissions (seul l'utilisateur lui-même ou un admin peut voir ses performances)
+            if (Auth::id() !== $user->id && !Auth::user()->isAdmin()) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
 
-        $startDate = $request->input('start_date', Carbon::now()->subMonth());
-        $endDate = $request->input('end_date', Carbon::now());
+            $assignedTasks = Task::where('assignee_id', $user->id)->get();
+            $completedTasks = $assignedTasks->where('status', 'completed');
+            
+            $performance = [
+                'user_name' => $user->name,
+                'total_tasks' => $assignedTasks->count(),
+                'completed_tasks' => $completedTasks->count(),
+                'completion_rate' => $assignedTasks->count() > 0 
+                    ? ($completedTasks->count() / $assignedTasks->count()) * 100 
+                    : 0,
+                'on_time_completion' => $completedTasks
+                    ->filter(function($task) {
+                        return $task->completed_at <= $task->due_date;
+                    })->count(),
+                'projects_involved' => $user->projects()->count()
+            ];
 
-        $teamMembers = $project->members()
-            ->with(['tasks' => function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
-            }])
-            ->get();
-
-        $teamStats = [
-            'total_members' => $teamMembers->count(),
-            'total_tasks' => $teamMembers->sum(function ($member) {
-                return $member->tasks->count();
-            }),
-            'completed_tasks' => $teamMembers->sum(function ($member) {
-                return $member->tasks->where('status', 'completed')->count();
-            }),
-            'average_completion_rate' => $teamMembers->avg(function ($member) {
-                $totalTasks = $member->tasks->count();
-                return $totalTasks > 0 
-                    ? ($member->tasks->where('status', 'completed')->count() / $totalTasks) * 100
-                    : 0;
-            })
-        ];
-
-        if ($request->has('download')) {
-            $pdf = PDF::loadView('reports.team-performance', [
-                'project' => $project,
-                'teamMembers' => $teamMembers,
-                'stats' => $teamStats,
-                'period' => [
-                    'start' => $startDate,
-                    'end' => $endDate
-                ]
-            ]);
-
-            return $pdf->download("team-performance-{$project->id}.pdf");
+            return response()->json($performance);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        return response()->json([
-            'project' => $project,
-            'teamMembers' => $teamMembers,
-            'stats' => $teamStats,
-            'period' => [
-                'start' => $startDate,
-                'end' => $endDate
-            ]
-        ]);
     }
-} 
+
+    public function teamPerformance(Project $project)
+    {
+        try {
+            // Vérifier les permissions
+            if (!$project->members()->where('user_id', Auth::id())->exists()) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+
+            $teamMembers = $project->members;
+            $teamPerformance = [];
+
+            foreach ($teamMembers as $member) {
+                $memberTasks = $project->tasks()->where('assignee_id', $member->id)->get();
+                $completedTasks = $memberTasks->where('status', 'completed');
+
+                $teamPerformance[] = [
+                    'member_name' => $member->name,
+                    'member_role' => $member->pivot->role,
+                    'total_tasks' => $memberTasks->count(),
+                    'completed_tasks' => $completedTasks->count(),
+                    'completion_rate' => $memberTasks->count() > 0 
+                        ? ($completedTasks->count() / $memberTasks->count()) * 100 
+                        : 0,
+                    'on_time_completion' => $completedTasks
+                        ->filter(function($task) {
+                            return $task->completed_at <= $task->due_date;
+                        })->count()
+                ];
+            }
+
+            return response()->json([
+                'project_name' => $project->title,
+                'team_size' => $teamMembers->count(),
+                'team_performance' => $teamPerformance
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+}

@@ -2,6 +2,12 @@
     padding: 2rem;
 }
 
+.team-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
 .team-header {
     display: flex;
     justify-content: space-between;
@@ -11,6 +17,21 @@
 
 .team-header h1 {
     color: var(--primary-color);
+}
+
+.team-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.project-selector {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    font-size: 1rem;
+    min-width: 200px;
 }
 
 /* Team Grid */
@@ -27,105 +48,224 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
+    justify-content: space-between;
+    height: 100%;
 }
 
-.member-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    overflow: hidden;
+.member-info {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
     margin-bottom: 1rem;
 }
 
-.member-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.avatar-placeholder {
-    width: 100%;
-    height: 100%;
+.member-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
     background-color: var(--primary-color);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: bold;
+    flex-shrink: 0;
 }
 
-.member-info {
-    margin-bottom: 1.5rem;
+.member-details {
+    flex-grow: 1;
 }
 
-.member-info h3 {
+.member-details h3 {
     margin: 0 0 0.5rem 0;
     color: var(--text-color);
 }
 
-.member-role {
-    color: var(--primary-color);
-    font-weight: 500;
-    margin: 0 0 0.25rem 0;
-}
-
 .member-email {
     color: #666;
-    margin: 0;
+    margin: 0 0 0.5rem 0;
     font-size: 0.875rem;
 }
 
-.member-stats {
+.role-section {
     display: flex;
-    gap: 2rem;
-    margin-bottom: 1.5rem;
-    padding: 1rem 0;
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
-    width: 100%;
-    justify-content: center;
-}
-
-.stat-item {
-    display: flex;
-    flex-direction: column;
     align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
 }
 
-.stat-value {
-    font-size: 1.5rem;
+.role-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
     font-weight: 600;
-    color: var(--primary-color);
+    text-transform: uppercase;
 }
 
-.stat-label {
-    font-size: 0.875rem;
-    color: #666;
+.role-badge.member {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.role-badge.admin {
+    background-color: #e8f5e9;
+    color: #388e3c;
+}
+
+.role-badge.owner {
+    background-color: #fff8e1;
+    color: #ffa000;
+}
+
+.role-dropdown {
+    padding: 0.25rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    font-size: 0.75rem;
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.2s ease;
+}
+
+.member-info:hover .role-dropdown {
+    visibility: visible;
+    opacity: 1;
 }
 
 .member-actions {
-    width: 100%;
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
 }
 
-/* Loading and Error States */
-.loading, .error {
-    text-align: center;
+/* Modal Styles */
+.modal {
+    border: none;
+    border-radius: 8px;
+    padding: 0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 500px;
+}
+
+.modal::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
     padding: 2rem;
-    font-size: 1.1rem;
 }
 
-.error {
+.modal-content h2 {
+    margin-top: 0;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    font-size: 1rem;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 0.25rem;
+    color: #666;
+    font-size: 0.75rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    color: #666;
+    font-size: 1.1rem;
+    grid-column: 1 / -1;
+}
+
+/* Error message */
+.error-message {
+    background-color: #ffebee;
     color: #c62828;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* Loading state */
+.loading {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+}
+
+/* Buttons */
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-secondary {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background-color: #e0e0e0;
+}
+
+.btn-danger {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.btn-danger:hover {
+    background-color: #ffcdd2;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .team {
+    .team-container {
         padding: 1rem;
     }
     
@@ -135,7 +275,26 @@
         align-items: flex-start;
     }
     
+    .team-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .project-selector {
+        width: 100%;
+    }
+    
     .team-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .member-info {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .role-section {
+        justify-content: center;
     }
 } 

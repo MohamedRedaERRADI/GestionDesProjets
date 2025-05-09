@@ -13,12 +13,13 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->foreignId('project_id')->constrained()->onDelete('cascade');
-            $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('assignee_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->date('due_date')->nullable();
-            $table->enum('status', ['todo', 'in_progress', 'review', 'completed'])->default('todo');
+            $table->string('status')->default('todo'); // Modification ici pour compatibilité avec board_columns
             $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -26,4 +27,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('tasks');
     }
-}; 
+};

@@ -99,7 +99,7 @@ const TaskList = () => {
                             <div className="meta-item">
                                 <span className="meta-label">Project:</span>
                                 <Link to={`/projects/${task.project_id}`} className="project-link">
-                                    {task.project_name}
+                                    {task.project?.title || 'Unknown'}
                                 </Link>
                             </div>
                             <div className="meta-item">
@@ -123,4 +123,4 @@ const TaskList = () => {
     );
 };
 
-export default TaskList; 
+export default TaskList;

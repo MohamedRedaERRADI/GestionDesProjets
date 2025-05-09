@@ -55,4 +55,14 @@ class Project extends Model
     {
         return $this->members()->wherePivot('role', 'manager');
     }
+
+    public function boardColumns()
+    {
+        return $this->hasMany(BoardColumn::class)->orderBy('order');
+    }
+
+    public function comments()
+    {
+        return $this->hasManyThrough(Comment::class, Task::class);
+    }
 }

@@ -1,0 +1,118 @@
+.reports-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.reports-container h1 {
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+}
+
+.reports-container h2 {
+    color: var(--primary-color);
+    margin: 1.5rem 0;
+}
+
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.loading {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+}
+
+.stats-section, .project-section {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.chart-container {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    height: 300px;
+}
+
+.project-selector {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.progress-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.progress-info p {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    margin: 0;
+}
+
+.team-performance {
+    margin-top: 2rem;
+}
+
+.team-stats {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.members-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.member-performance {
+    background: white;
+    padding: 1rem;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.member-performance h4 {
+    color: var(--primary-color);
+    margin: 0 0 0.5rem 0;
+}
+
+.member-performance p {
+    margin: 0.25rem 0;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .reports-container {
+        padding: 1rem;
+    }
+
+    .progress-info {
+        grid-template-columns: 1fr;
+    }
+
+    .members-list {
+        grid-template-columns: 1fr;
+    }
+}

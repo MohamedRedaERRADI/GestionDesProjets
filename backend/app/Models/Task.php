@@ -16,7 +16,7 @@ class Task extends Model
         'status',
         'due_date',
         'project_id',
-        'assigned_to',
+        'assignee_id',
         'created_by',
         'priority'
     ];
@@ -25,14 +25,16 @@ class Task extends Model
         'due_date' => 'date',
     ];
 
+    protected $with = ['project', 'assignee'];
+
     public function project()
     {
         return $this->belongsTo(Project::class);
     }
 
-    public function assignedUser()
+    public function assignee()
     {
-        return $this->belongsTo(User::class, 'assigned_to');
+        return $this->belongsTo(User::class, 'assignee_id');
     }
 
     public function creator()

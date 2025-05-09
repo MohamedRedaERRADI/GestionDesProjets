@@ -4,7 +4,6 @@ import { API_ENDPOINTS } from '../config/api';
 import { testApiConnection, testAuthConnection } from '../utils/apiTest';
 import {
     Box,
-    Grid,
     Card,
     CardContent,
     Typography,
@@ -15,6 +14,7 @@ import {
     IconButton,
     useTheme,
 } from '@mui/material';
+import { Grid } from '@mui/material/Unstable_Grid2';
 import {
     Assignment as TaskIcon,
     Folder as ProjectIcon,
@@ -301,7 +301,7 @@ const Dashboard = () => {
                 Dashboard
             </Typography>
             <Grid container spacing={3}>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid xs={12} sm={6} md={3}>
                     <StatCard
                         title="Total Projects"
                         value={stats.totalProjects}
@@ -310,7 +310,7 @@ const Dashboard = () => {
                         trend={5}
                     />
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid xs={12} sm={6} md={3}>
                     <StatCard
                         title="Total Tasks"
                         value={stats.totalTasks}
@@ -319,7 +319,7 @@ const Dashboard = () => {
                         trend={-2}
                     />
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid xs={12} sm={6} md={3}>
                     <StatCard
                         title="Completed Tasks"
                         value={stats.completedTasks}
@@ -328,7 +328,7 @@ const Dashboard = () => {
                         trend={8}
                     />
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid xs={12} sm={6} md={3}>
                     <StatCard
                         title="Team Members"
                         value={stats.teamMembers}
@@ -340,25 +340,25 @@ const Dashboard = () => {
             </Grid>
 
             <Grid container spacing={3} sx={{ mt: 3 }}>
-                <Grid item xs={12} md={6}>
+                <Grid xs={12} md={6}>
                     <Typography variant="h5" gutterBottom>
                         Recent Projects
                     </Typography>
                     <Grid container spacing={2}>
                         {recentProjects.map((project) => (
-                            <Grid item xs={12} key={project.id}>
+                            <Grid xs={12} key={project.id}>
                                 <ProjectCard project={project} />
                             </Grid>
                         ))}
                     </Grid>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid xs={12} md={6}>
                     <Typography variant="h5" gutterBottom>
                         Upcoming Tasks
                     </Typography>
                     <Grid container spacing={2}>
                         {upcomingTasks.map((task) => (
-                            <Grid item xs={12} key={task.id}>
+                            <Grid xs={12} key={task.id}>
                                 <TaskCard task={task} />
                             </Grid>
                         ))}
@@ -369,4 +369,4 @@ const Dashboard = () => {
     );
 };
 
-export default Dashboard; 
+export default Dashboard;

@@ -30,10 +30,10 @@ const TaskForm = ({ open, onClose, onSubmit, task, projects, formData, setFormDa
       updateFormData({
         title: task.title || '',
         description: task.description || '',
-        dueDate: task.dueDate || '',
+        dueDate: task.due_date ? task.due_date.split('T')[0] : '',
         priority: task.priority || 'medium',
         status: task.status || 'pending',
-        projectId: task.projectId || '',
+        projectId: task.project_id || '',
       });
     } else {
       updateFormData({
@@ -45,7 +45,7 @@ const TaskForm = ({ open, onClose, onSubmit, task, projects, formData, setFormDa
         projectId: '',
       });
     }
-  }, [task]);
+  }, [task, updateFormData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,14 +54,6 @@ const TaskForm = ({ open, onClose, onSubmit, task, projects, formData, setFormDa
       [name]: value,
     }));
   };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(e);
-  };
-
-  // Ajouter un log pour vérifier la liste des projets
-  console.log('TaskForm projects:', projects);
 
   return (
     <>
@@ -110,8 +102,8 @@ const TaskForm = ({ open, onClose, onSubmit, task, projects, formData, setFormDa
           >
             {Array.isArray(projects) && projects.length > 0 ? (
               projects.map((project) => (
-                <MenuItem key={project.id || project._id} value={project.id || project._id}>
-                  {project.name}
+                <MenuItem key={project.id} value={project.id}>
+                  {project.title}
                 </MenuItem>
               ))
             ) : (
@@ -156,4 +148,4 @@ const TaskForm = ({ open, onClose, onSubmit, task, projects, formData, setFormDa
   );
 };
 
-export default TaskForm; 
+export default TaskForm;

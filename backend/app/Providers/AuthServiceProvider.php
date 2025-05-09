@@ -5,7 +5,10 @@ namespace App\Providers;
 // use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use App\Models\Comment;
+use App\Models\Project;
 use App\Policies\CommentPolicy;
+use App\Policies\ProjectPolicy;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -17,6 +20,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
         Comment::class => CommentPolicy::class,
+        Project::class => ProjectPolicy::class,
     ];
 
     /**
@@ -28,6 +32,7 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        // Alias pour la méthode manageTeam
+        Gate::define('manage-team', [ProjectPolicy::class, 'manageTeam']);
     }
 }
